@@ -45,6 +45,7 @@ interface Order {
   };
   items: OrderItem[];
   packaging_option: string;
+  has_prep_kit: boolean;
   total: number;
   orderNotes?: string;
   orderDate: string;
@@ -81,7 +82,9 @@ export function Orders() {
     productName: "",
     quantity: 1,
     price: 0,
-    packaging_option: "Standard"
+    packaging_option: "Standard",
+    has_prep_kit: false,
+    total: 0
   });
 
   const getAuthHeaders = () => {
@@ -112,6 +115,7 @@ export function Orders() {
         trackingId: dbOrder.tracking_id || undefined,
         address: dbOrder.address,
         packaging_option: dbOrder.packaging_option || "Standard",
+        has_prep_kit: dbOrder.has_prep_kit || false,
         total: parseFloat(dbOrder.total),
         orderNotes: dbOrder.order_notes || "",
         orderDate: dbOrder.created_at,
@@ -175,7 +179,8 @@ export function Orders() {
         }
       ],
       packaging_option: newOrder.packaging_option,
-      total: newOrder.price * newOrder.quantity + (newOrder.packaging_option !== "Standard" ? 150 : 0),
+      has_prep_kit: newOrder.has_prep_kit,
+      total: newOrder.price * newOrder.quantity + (newOrder.packaging_option !== "Standard" ? 150 : 0) + (newOrder.has_prep_kit ? 100 : 0),
       orderDate: new Date().toISOString().split('T')[0]
     };
 
@@ -198,7 +203,9 @@ export function Orders() {
       productName: "",
       quantity: 1,
       price: 0,
-      packaging_option: "Standard"
+      packaging_option: "Standard",
+      has_prep_kit: false,
+      total: 0
     });
   };
 
@@ -242,6 +249,7 @@ export function Orders() {
           tracking_id: editedOrder.trackingId,
           address: editedOrder.address,
           packaging_option: editedOrder.packaging_option,
+          has_prep_kit: editedOrder.has_prep_kit,
           total: editedOrder.total,
           order_notes: editedOrder.orderNotes,
           customer_id: selectedOrder.customerId,
@@ -496,14 +504,23 @@ export function Orders() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {order.packaging_option !== "Standard" ? (
-                      <div className="flex items-center gap-1.5 w-max">
-                        <Package className="w-4 h-4" style={{ color: '#7A0D19' }} />
-                        <span className="text-sm font-medium">{order.packaging_option}</span>
-                      </div>
-                    ) : (
-                      <span className="text-sm text-gray-500">Standard</span>
-                    )}
+                    <div className="flex flex-col gap-1 items-start">
+                      {order.packaging_option !== "Standard" ? (
+                        <div className="flex items-center gap-1.5 w-max">
+                          <Package className="w-4 h-4" style={{ color: '#7A0D19' }} />
+                          <span className="text-sm font-medium">{order.packaging_option}</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-500">Standard</span>
+                      )}
+                      
+                      {order.has_prep_kit && (
+                        <Badge variant="outline" className={`flex items-center gap-1 font-body text-xs cursor-default text-[#7A0D19] bg-[#E5B6BB20] hover:bg-[#E5B6BB40] border-[#E5B6BB]`}>
+                          <Plus className="w-3 h-3" />
+                          Prep Kit
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
@@ -720,6 +737,26 @@ export function Orders() {
                 </Select>
               </div>
             </div>
+              
+            <div className="flex items-center gap-3 py-2">
+              <Checkbox
+                id="addPrepKit"
+                checked={newOrder.has_prep_kit}
+                onCheckedChange={(checked) => {
+                  const hasKit = checked as boolean;
+                  const prevWasChecked = newOrder.has_prep_kit;
+                  
+                  let newTotal = newOrder.total !== undefined ? newOrder.total : 0;
+                  if (hasKit && !prevWasChecked) newTotal += 100;
+                  else if (!hasKit && prevWasChecked) newTotal -= 100;
+
+                  setNewOrder({ ...newOrder, has_prep_kit: hasKit, total: newTotal });
+                }}
+              />
+              <label htmlFor="addPrepKit" className="text-sm font-medium cursor-pointer">
+                Include Prep Kit (+ Rs. 100)
+              </label>
+            </div>
 
             {/* Total Preview */}
             <div className="pt-4 border-t flex justify-between items-center" style={{ borderColor: '#F2D2D6' }}>
@@ -733,7 +770,7 @@ export function Orders() {
                   color: '#7A0D19',
                 }}
               >
-                Rs. {(newOrder.price * newOrder.quantity + (newOrder.packaging_option !== "Standard" ? 150 : 0)).toLocaleString()}
+                Rs. {(newOrder.total !== undefined ? newOrder.total : 0).toLocaleString()}
               </span>
             </div>
 
@@ -794,7 +831,7 @@ export function Orders() {
                     <div className="flex gap-2">
                       <Button
                         onClick={() => {
-                          setEditedOrder(selectedOrder);
+                          setEditedOrder(selectedOrder || {});
                           setIsEditingOrder(true);
                         }}
                         variant="outline"
@@ -1036,6 +1073,43 @@ export function Orders() {
                        <Package className="w-4 h-4" />
                        {selectedOrder.packaging_option}
                     </div>
+                  )}
+                </div>
+              )}
+
+              {/* Prep Kit */}
+              {(selectedOrder.has_prep_kit || isEditingOrder) && (
+                <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background: '#E5B6BB20' }}>
+                  {isEditingOrder ? (
+                    <>
+                      <Checkbox
+                        id="editPrepKit"
+                        checked={editedOrder.has_prep_kit !== undefined ? editedOrder.has_prep_kit : selectedOrder.has_prep_kit}
+                        onCheckedChange={(checked) => {
+                          const hasKit = checked as boolean;
+                          const currentTotal = editedOrder.total || selectedOrder.total;
+                          const wasChecked = editedOrder.has_prep_kit !== undefined ? editedOrder.has_prep_kit : selectedOrder.has_prep_kit;
+                          
+                          let newTotal = currentTotal;
+                          if (hasKit && !wasChecked) newTotal += 100;
+                          else if (!hasKit && wasChecked) newTotal -= 100;
+
+                          setEditedOrder({
+                            ...editedOrder,
+                            has_prep_kit: hasKit,
+                            total: newTotal
+                          });
+                        }}
+                      />
+                      <label htmlFor="editPrepKit" className="text-sm cursor-pointer" style={{ color: '#7A0D19' }}>
+                        Prep Kit Included (+Rs. 100)
+                      </label>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" style={{ color: '#7A0D19' }} />
+                      <span className="text-sm" style={{ color: '#7A0D19' }}>Prep Kit Included</span>
+                    </>
                   )}
                 </div>
               )}
