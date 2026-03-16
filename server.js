@@ -154,7 +154,7 @@ app.put('/api/settings/banner', verifyToken, async (req, res) => {
 
 // --- CHECKOUT API (Public Storefront) ---
 app.post('/api/checkout', async (req, res) => {
-  const { name, email, phone, address, items, total, hasLuxuryGiftBox, order_notes, paymentMethod } = req.body;
+  const { name, email, phone, address, items, total, packaging_option, order_notes, paymentMethod } = req.body;
 
   try {
     // 1. Find or create customer
@@ -204,7 +204,7 @@ app.post('/api/checkout', async (req, res) => {
         customer_id: customerId,
         status: 'Pending',
         address,
-        has_luxury_gift_box: hasLuxuryGiftBox,
+        packaging_option: packaging_option,
         total,
         order_notes: order_notes || '',
         payment_method: paymentMethod || 'COD',
@@ -272,14 +272,14 @@ app.get('/api/orders', verifyToken, async (req, res) => {
 app.patch('/api/orders/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, tracking_id, address, has_luxury_gift_box, total, order_notes, customer_id, customer_name, customer_email, customer_phone, payment_status } = req.body;
+    const { status, tracking_id, address, packaging_option, total, order_notes, customer_id, customer_name, customer_email, customer_phone, payment_status } = req.body;
     
     // Build update object based on what was passed
     const updates = {};
     if (status) updates.status = status;
     if (tracking_id !== undefined) updates.tracking_id = tracking_id;
     if (address) updates.address = address;
-    if (has_luxury_gift_box !== undefined) updates.has_luxury_gift_box = has_luxury_gift_box;
+    if (packaging_option !== undefined) updates.packaging_option = packaging_option;
     if (total !== undefined) updates.total = total;
     if (order_notes !== undefined) updates.order_notes = order_notes;
     if (payment_status !== undefined) updates.payment_status = payment_status;

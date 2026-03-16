@@ -44,7 +44,7 @@ interface Order {
     city: string;
   };
   items: OrderItem[];
-  hasLuxuryGiftBox: boolean;
+  packaging_option: string;
   total: number;
   orderNotes?: string;
   orderDate: string;
@@ -81,7 +81,7 @@ export function Orders() {
     productName: "",
     quantity: 1,
     price: 0,
-    hasLuxuryGiftBox: false
+    packaging_option: "Standard"
   });
 
   const getAuthHeaders = () => {
@@ -111,7 +111,7 @@ export function Orders() {
         status: dbOrder.status,
         trackingId: dbOrder.tracking_id || undefined,
         address: dbOrder.address,
-        hasLuxuryGiftBox: dbOrder.has_luxury_gift_box,
+        packaging_option: dbOrder.packaging_option || "Standard",
         total: parseFloat(dbOrder.total),
         orderNotes: dbOrder.order_notes || "",
         orderDate: dbOrder.created_at,
@@ -174,8 +174,8 @@ export function Orders() {
           thumbnail: "💅"
         }
       ],
-      hasLuxuryGiftBox: newOrder.hasLuxuryGiftBox,
-      total: newOrder.price * newOrder.quantity + (newOrder.hasLuxuryGiftBox ? 250 : 0),
+      packaging_option: newOrder.packaging_option,
+      total: newOrder.price * newOrder.quantity + (newOrder.packaging_option !== "Standard" ? 150 : 0),
       orderDate: new Date().toISOString().split('T')[0]
     };
 
@@ -198,7 +198,7 @@ export function Orders() {
       productName: "",
       quantity: 1,
       price: 0,
-      hasLuxuryGiftBox: false
+      packaging_option: "Standard"
     });
   };
 
@@ -241,7 +241,7 @@ export function Orders() {
         body: JSON.stringify({
           tracking_id: editedOrder.trackingId,
           address: editedOrder.address,
-          has_luxury_gift_box: editedOrder.hasLuxuryGiftBox,
+          packaging_option: editedOrder.packaging_option,
           total: editedOrder.total,
           order_notes: editedOrder.orderNotes,
           customer_id: selectedOrder.customerId,
@@ -299,7 +299,8 @@ export function Orders() {
   ).filter(order =>
     statusFilter === 'All' || order.status === statusFilter
   ).filter(order =>
-    giftBoxFilter === 'All' || (giftBoxFilter === 'With Gift Box' ? order.hasLuxuryGiftBox : !order.hasLuxuryGiftBox)
+    giftBoxFilter === 'All' || 
+    (giftBoxFilter === 'With Gift Box' ? order.packaging_option !== "Standard" : order.packaging_option === "Standard")
   );
 
   return (
@@ -383,8 +384,8 @@ export function Orders() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="All">All Orders</SelectItem>
-            <SelectItem value="With Gift Box">With Gift Box</SelectItem>
-            <SelectItem value="Without Gift Box">Without Gift Box</SelectItem>
+            <SelectItem value="With Gift Box">Upgraded Packaging</SelectItem>
+            <SelectItem value="Without Gift Box">Standard Packaging</SelectItem>
           </SelectContent>
         </Select>
 
@@ -420,7 +421,7 @@ export function Orders() {
                 Tracking ID
               </TableHead>
               <TableHead style={{ fontFamily: 'Playfair Display, serif', color: '#7A0D19' }}>
-                Gift Box
+                Packaging
               </TableHead>
               <TableHead style={{ fontFamily: 'Playfair Display, serif', color: '#7A0D19' }}>
                 Location
@@ -495,10 +496,13 @@ export function Orders() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {order.hasLuxuryGiftBox ? (
-                      <Package className="w-4 h-4" style={{ color: '#7A0D19' }} />
+                    {order.packaging_option !== "Standard" ? (
+                      <div className="flex items-center gap-1.5 w-max">
+                        <Package className="w-4 h-4" style={{ color: '#7A0D19' }} />
+                        <span className="text-sm font-medium">{order.packaging_option}</span>
+                      </div>
                     ) : (
-                      <span className="text-sm text-gray-500">None</span>
+                      <span className="text-sm text-gray-500">Standard</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -698,21 +702,23 @@ export function Orders() {
               </div>
             </div>
 
-            {/* Gift Box */}
-            <div className="flex items-center space-x-2 p-4 rounded-xl" style={{ background: '#E5B6BB20' }}>
-              <Checkbox
-                id="giftBox"
-                checked={newOrder.hasLuxuryGiftBox}
-                onCheckedChange={(checked) => setNewOrder({ ...newOrder, hasLuxuryGiftBox: checked as boolean })}
-              />
-              <label
-                htmlFor="giftBox"
-                className="text-sm cursor-pointer flex items-center gap-2"
-                style={{ color: '#7A0D19' }}
-              >
-                <Package className="w-4 h-4" />
-                Add Luxury Gift Box (+ Rs. 250)
-              </label>
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="col-span-2">
+                <Label htmlFor="packagingOpt" style={{ color: '#7A0D19' }}>Packaging Theme *</Label>
+                <Select
+                  value={newOrder.packaging_option}
+                  onValueChange={(value) => setNewOrder({ ...newOrder, packaging_option: value })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Standard">Standard (Free)</SelectItem>
+                    <SelectItem value="Pink Theme">Pink Theme (+ Rs. 150)</SelectItem>
+                    <SelectItem value="Black Theme">Black Theme (+ Rs. 150)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Total Preview */}
@@ -727,7 +733,7 @@ export function Orders() {
                   color: '#7A0D19',
                 }}
               >
-                Rs. {(newOrder.price * newOrder.quantity + (newOrder.hasLuxuryGiftBox ? 250 : 0)).toLocaleString()}
+                Rs. {(newOrder.price * newOrder.quantity + (newOrder.packaging_option !== "Standard" ? 150 : 0)).toLocaleString()}
               </span>
             </div>
 
@@ -994,38 +1000,42 @@ export function Orders() {
               </div>
 
               {/* Add-ons */}
-              {(selectedOrder.hasLuxuryGiftBox || isEditingOrder) && (
-                <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background: '#E5B6BB20' }}>
+              {(selectedOrder.packaging_option !== "Standard" || isEditingOrder) && (
+                <div className="flex flex-col gap-2 p-3 rounded-xl" style={{ background: '#E5B6BB20' }}>
+                  <Label style={{ color: '#7A0D19', fontWeight: 600 }}>Packaging Theme</Label>
                   {isEditingOrder ? (
-                    <>
-                      <Checkbox
-                        id="editGiftBox"
-                        checked={editedOrder.hasLuxuryGiftBox}
-                        onCheckedChange={(checked) => {
-                          const isGiftBoxChecked = checked as boolean;
-                          const currentTotal = editedOrder.total || selectedOrder.total;
-                          const wasChecked = editedOrder.hasLuxuryGiftBox;
-                          // only change total if status is actually changing
-                          let newTotal = currentTotal;
-                          if (isGiftBoxChecked && !wasChecked) newTotal += 250;
-                          else if (!isGiftBoxChecked && wasChecked) newTotal -= 250;
+                    <Select
+                      value={editedOrder.packaging_option || selectedOrder.packaging_option}
+                      onValueChange={(value) => {
+                        const currentTotal = editedOrder.total || selectedOrder.total;
+                        const wasStandard = (editedOrder.packaging_option || selectedOrder.packaging_option) === "Standard";
+                        const isNowStandard = value === "Standard";
+                        
+                        let newTotal = currentTotal;
+                        if (!wasStandard && isNowStandard) newTotal -= 150; // removing paid packaging
+                        else if (wasStandard && !isNowStandard) newTotal += 150; // adding paid packaging
 
-                          setEditedOrder({
-                            ...editedOrder,
-                            hasLuxuryGiftBox: isGiftBoxChecked,
-                            total: newTotal
-                          });
-                        }}
-                      />
-                      <label htmlFor="editGiftBox" className="text-sm cursor-pointer" style={{ color: '#7A0D19' }}>
-                        Luxury Gift Box Included (+Rs. 250)
-                      </label>
-                    </>
+                        setEditedOrder({
+                          ...editedOrder,
+                          packaging_option: value,
+                          total: newTotal
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Standard">Standard (Free)</SelectItem>
+                        <SelectItem value="Pink Theme">Pink Theme (+ Rs. 150)</SelectItem>
+                        <SelectItem value="Black Theme">Black Theme (+ Rs. 150)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   ) : (
-                    <>
-                      <Package className="w-5 h-5" style={{ color: '#7A0D19' }} />
-                      <span className="text-sm" style={{ color: '#7A0D19' }}>Luxury Gift Box Included</span>
-                    </>
+                    <div className="text-sm flex items-center gap-2" style={{ color: '#7A0D19' }}>
+                       <Package className="w-4 h-4" />
+                       {selectedOrder.packaging_option}
+                    </div>
                   )}
                 </div>
               )}

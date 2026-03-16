@@ -81,7 +81,7 @@ export function Dashboard() {
           })
           .reduce((sum: number, o: any) => sum + Number(o.total), 0);
 
-        const giftBoxes = orders.filter((o: any) => o.has_luxury_gift_box === true).length;
+        const giftBoxes = orders.filter((o: any) => o.packaging_option && o.packaging_option !== 'Standard').length;
 
         setQuickStats({
           revenue: monthlyRevenue,
