@@ -13,6 +13,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Rewrite /admin/api to /api for production Admin Panel frontend
+app.use((req, res, next) => {
+  if (req.url.startsWith('/admin/api')) {
+    req.url = req.url.replace(/^\/admin\/api/, '/api');
+  }
+  next();
+});
+
 // Set up multer for memory storage (for passing buffers directly to Supabase)
 const upload = multer({ storage: multer.memoryStorage() });
 
