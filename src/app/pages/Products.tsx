@@ -340,6 +340,7 @@ export function Products() {
                   <SelectContent>
                     <SelectItem value="Featured">Featured</SelectItem>
                     <SelectItem value="Premium">Premium</SelectItem>
+                    <SelectItem value="Premium Bridal Sets">Premium Bridal Sets</SelectItem>
                     <SelectItem value="New Arrivals">New Arrivals</SelectItem>
                     <SelectItem value="Archives">Archives</SelectItem>
                   </SelectContent>
