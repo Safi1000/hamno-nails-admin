@@ -263,8 +263,22 @@ app.get('/api/orders', verifyToken, async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
+    
+    // DEBUG: check if order_items are actually populating
+    if (orders && orders.length > 0 && orders[0].order_items) {
+      console.log("==== GET /api/orders DEBUG ====");
+      console.log("Orders count:", orders.length);
+      console.log("Sample order:", orders[0].friendly_id, "has order_items count = ", orders[0].order_items.length);
+      if (orders[0].order_items.length > 0) {
+         console.log("Sample item from first order:", orders[0].order_items[0]);
+      }
+    } else {
+      console.log("API returned orders array, but missing or empty order_items property on first element.");
+    }
+    
     res.json(orders);
   } catch (err) {
+    console.error("GET /api/orders error:", err);
     res.status(500).json({ error: err.message });
   }
 });
