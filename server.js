@@ -52,7 +52,7 @@ app.post('/api/login', (req, res) => {
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   if (!authHeader) return res.status(403).json({ error: 'No token provided' });
-  
+
   const token = authHeader.split(' ')[1]; // "Bearer <token>"
   if (!token) return res.status(403).json({ error: 'No token provided' });
 
@@ -160,7 +160,7 @@ app.post('/api/checkout', async (req, res) => {
     // 1. Find or create customer
     let customerId;
     let customerError;
-    
+
     const { data: existingCustomer } = await supabase
       .from('customers')
       .select('*')
@@ -176,7 +176,7 @@ app.post('/api/checkout', async (req, res) => {
         .insert([{ name, email, phone, lifetime_value: 0, total_orders: 0 }])
         .select()
         .single();
-      
+
       if (insertError) throw insertError;
       customerId = newCustomer.id;
     }
@@ -188,7 +188,7 @@ app.post('/api/checkout', async (req, res) => {
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
-      
+
     let nextNum = 1000;
     if (lastOrder && lastOrder.friendly_id) {
       const match = lastOrder.friendly_id.match(/NBH-(\d+)/);
@@ -274,7 +274,7 @@ app.patch('/api/orders/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { status, tracking_id, address, packaging_option, has_prep_kit, total, order_notes, customer_id, customer_name, customer_email, customer_phone, payment_status } = req.body;
-    
+
     // Build update object based on what was passed
     const updates = {};
     if (status) updates.status = status;
@@ -301,7 +301,7 @@ app.patch('/api/orders/:id', verifyToken, async (req, res) => {
       if (customer_name) customerUpdates.name = customer_name;
       if (customer_email) customerUpdates.email = customer_email;
       if (customer_phone) customerUpdates.phone = customer_phone;
-      
+
       const { error: custError } = await supabase
         .from('customers')
         .update(customerUpdates)
@@ -357,7 +357,7 @@ app.patch('/api/customers/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, phone, special_notes, total_orders, lifetime_value } = req.body;
-    
+
     const updates = {};
     if (name) updates.name = name;
     if (email) updates.email = email;
@@ -365,7 +365,7 @@ app.patch('/api/customers/:id', verifyToken, async (req, res) => {
     if (special_notes !== undefined) updates.special_notes = special_notes;
     if (total_orders !== undefined) updates.total_orders = total_orders;
     if (lifetime_value !== undefined) updates.lifetime_value = lifetime_value;
-    
+
     const { data, error } = await supabase
       .from('customers')
       .update(updates)
@@ -401,7 +401,7 @@ app.delete('/api/customers/:id', verifyToken, async (req, res) => {
 if (process.env.NODE_ENV === 'production') {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  
+
   // Serve the static files from the React build
   app.use('/admin', express.static(path.join(__dirname, 'dist')));
 
