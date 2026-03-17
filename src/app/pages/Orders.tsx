@@ -4,15 +4,15 @@ import { Search, Eye, Package, Plus, Edit2, Filter, Trash2 } from "lucide-react"
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
-import { 
-  AlertDialog, 
-  AlertDialogContent, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogCancel, 
-  AlertDialogAction 
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
 } from "../components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { Button } from "../components/ui/button";
@@ -307,7 +307,7 @@ export function Orders() {
   ).filter(order =>
     statusFilter === 'All' || order.status === statusFilter
   ).filter(order =>
-    giftBoxFilter === 'All' || 
+    giftBoxFilter === 'All' ||
     (giftBoxFilter === 'With Gift Box' ? order.packaging_option !== "Standard" : order.packaging_option === "Standard")
   );
 
@@ -513,7 +513,7 @@ export function Orders() {
                       ) : (
                         <span className="text-sm text-gray-500">Standard</span>
                       )}
-                      
+
                       {order.has_prep_kit && (
                         <Badge variant="outline" className={`flex items-center gap-1 font-body text-xs cursor-default text-[#7A0D19] bg-[#E5B6BB20] hover:bg-[#E5B6BB40] border-[#E5B6BB]`}>
                           <Plus className="w-3 h-3" />
@@ -737,7 +737,7 @@ export function Orders() {
                 </Select>
               </div>
             </div>
-              
+
             <div className="flex items-center gap-3 py-2">
               <Checkbox
                 id="addPrepKit"
@@ -745,7 +745,7 @@ export function Orders() {
                 onCheckedChange={(checked) => {
                   const hasKit = checked as boolean;
                   const prevWasChecked = newOrder.has_prep_kit;
-                  
+
                   let newTotal = newOrder.total !== undefined ? newOrder.total : 0;
                   if (hasKit && !prevWasChecked) newTotal += 100;
                   else if (!hasKit && prevWasChecked) newTotal -= 100;
@@ -1026,7 +1026,9 @@ export function Orders() {
                       </div>
                       <div className="flex-1">
                         <div>{item.productName}</div>
-                        <div className="text-xs text-gray-500">Qty: {item.quantity}</div>
+                        <div className="text-lg text-gray-500 font-bold">
+                          Qty: {item.quantity}
+                        </div>
                       </div>
                       <div style={{ fontFamily: 'Playfair Display, serif', color: '#7A0D19' }}>
                         Rs. {item.price.toLocaleString()}
@@ -1047,7 +1049,7 @@ export function Orders() {
                         const currentTotal = editedOrder.total || selectedOrder.total;
                         const wasStandard = (editedOrder.packaging_option || selectedOrder.packaging_option) === "Standard";
                         const isNowStandard = value === "Standard";
-                        
+
                         let newTotal = currentTotal;
                         if (!wasStandard && isNowStandard) newTotal -= 150; // removing paid packaging
                         else if (wasStandard && !isNowStandard) newTotal += 150; // adding paid packaging
@@ -1070,8 +1072,8 @@ export function Orders() {
                     </Select>
                   ) : (
                     <div className="text-sm flex items-center gap-2" style={{ color: '#7A0D19' }}>
-                       <Package className="w-4 h-4" />
-                       {selectedOrder.packaging_option}
+                      <Package className="w-4 h-4" />
+                      {selectedOrder.packaging_option}
                     </div>
                   )}
                 </div>
@@ -1089,7 +1091,7 @@ export function Orders() {
                           const hasKit = checked as boolean;
                           const currentTotal = editedOrder.total || selectedOrder.total;
                           const wasChecked = editedOrder.has_prep_kit !== undefined ? editedOrder.has_prep_kit : selectedOrder.has_prep_kit;
-                          
+
                           let newTotal = currentTotal;
                           if (hasKit && !wasChecked) newTotal += 100;
                           else if (!hasKit && wasChecked) newTotal -= 100;
@@ -1158,7 +1160,7 @@ export function Orders() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteOrder}
               style={{ background: '#D41919', color: 'white' }}
             >
