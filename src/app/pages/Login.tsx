@@ -13,7 +13,7 @@ export function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     try {
       // The API proxy will forward this to the Express backend (port 3001)
       const response = await fetch('/admin/api/login', {
@@ -21,9 +21,9 @@ export function Login() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("adminToken", data.token); // Store the JWT
@@ -37,14 +37,14 @@ export function Login() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ 
+      style={{
         background: 'linear-gradient(135deg, #7A0D19 0%, #E5B6BB 100%)',
         fontFamily: 'Poppins, sans-serif'
       }}
     >
-      <div 
+      <div
         className="w-full max-w-md rounded-2xl p-8"
         style={{
           background: 'rgba(252, 249, 247, 0.95)',
@@ -55,7 +55,7 @@ export function Login() {
       >
         {/* Logo and Title */}
         <div className="flex flex-col items-center mb-8">
-          <div 
+          <div
             className="w-20 h-20 rounded-xl flex items-center justify-center mb-4 overflow-hidden"
             style={{
               background: 'white',
@@ -64,9 +64,9 @@ export function Login() {
           >
             <Sparkles className="w-10 h-10 text-[#7A0D19]" />
           </div>
-          <h1 
+          <h1
             className="text-center"
-            style={{ 
+            style={{
               fontFamily: 'Playfair Display, serif',
               fontSize: '2rem',
               fontWeight: 600,
@@ -74,9 +74,9 @@ export function Login() {
               letterSpacing: '0.5px',
             }}
           >
-            nailsbyhamno
+            nailsbyhamna
           </h1>
-          <p 
+          <p
             className="text-sm mt-1"
             style={{ color: '#7A0D19', opacity: 0.7 }}
           >
@@ -113,7 +113,7 @@ export function Login() {
           </div>
 
           {error && (
-            <div 
+            <div
               className="p-3 rounded-xl text-sm text-center"
               style={{ background: '#FFE5E5', color: '#D41919' }}
             >

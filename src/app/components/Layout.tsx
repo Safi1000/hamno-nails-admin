@@ -4,7 +4,7 @@ import { Package, ShoppingCart, Users, CreditCard, Megaphone, LayoutDashboard, L
 export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const navItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { path: "/products", icon: Package, label: "Products" },
@@ -13,7 +13,7 @@ export function Layout() {
     { path: "/payments", icon: CreditCard, label: "Payments" },
     { path: "/banner", icon: Megaphone, label: "Banner" },
   ];
-  
+
   const isActive = (path: string) => {
     return location.pathname === path || (location.pathname === "/" && path === "/dashboard");
   };
@@ -22,11 +22,11 @@ export function Layout() {
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
   };
-  
+
   return (
     <div className="min-h-screen flex" style={{ fontFamily: 'Poppins, sans-serif' }}>
       {/* Glassmorphic Sidebar */}
-      <aside 
+      <aside
         className="w-64 min-h-screen fixed left-0 top-0 border-r"
         style={{
           background: 'rgba(122, 13, 25, 0.8)',
@@ -37,7 +37,7 @@ export function Layout() {
       >
         <div className="p-6">
           <div className="flex items-center gap-3 mb-8">
-            <div 
+            <div
               className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0"
               style={{
                 background: 'rgba(252, 249, 247, 0.95)',
@@ -46,19 +46,19 @@ export function Layout() {
             >
               <Sparkles className="w-6 h-6 text-[#7A0D19]" />
             </div>
-            <h1 
+            <h1
               className="text-white"
-              style={{ 
+              style={{
                 fontFamily: 'Playfair Display, serif',
                 fontSize: '1.25rem',
                 fontWeight: 600,
                 letterSpacing: '0.5px',
               }}
             >
-              nailsbyhamno
+              nailsbyhamna
             </h1>
           </div>
-          
+
           <nav className="space-y-2">
             {navItems.map((item) => (
               <Link
@@ -66,8 +66,8 @@ export function Layout() {
                 to={item.path}
                 className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200"
                 style={{
-                  background: isActive(item.path) 
-                    ? 'rgba(229, 182, 187, 0.2)' 
+                  background: isActive(item.path)
+                    ? 'rgba(229, 182, 187, 0.2)'
                     : 'transparent',
                   color: '#FFFFFF',
                 }}
@@ -91,7 +91,7 @@ export function Layout() {
           </button>
         </div>
       </aside>
-      
+
       {/* Main Content */}
       <main className="flex-1 ml-64 p-8">
         <Outlet />
