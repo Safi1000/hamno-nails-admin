@@ -23,12 +23,13 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  category: string;
+  category: string[];
   nail_count: 12 | 24;
   has_prep_kit: boolean;
   stock_status: string;
   description: string;
   images: string[];
+  whats_included?: string[];
 }
 
 export function Products() {
@@ -69,16 +70,17 @@ export function Products() {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
-    category: "Featured",
+    category: ["Featured"] as string[],
     nail_count: 24 as 12 | 24,
     has_prep_kit: true,
     stock_status: "In Stock",
     description: "",
     images: [] as string[],
+    whats_included: "",
   });
   
   const handleSave = async () => {
-    const productPayload = {
+    const productPayload: any = {
       name: formData.name,
       price: parseFloat(formData.price),
       category: formData.category,
@@ -88,6 +90,14 @@ export function Products() {
       description: formData.description,
       images: formData.images,
     };
+
+    // Only save whats_included if the user typed something
+    const lines = formData.whats_included.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length > 0) {
+      productPayload.whats_included = lines;
+    } else {
+      productPayload.whats_included = null;
+    }
     
     try {
       if (editingProduct) {
@@ -118,12 +128,13 @@ export function Products() {
     setFormData({
       name: "",
       price: "",
-      category: "Featured",
+      category: ["Featured"] as string[],
       nail_count: 24 as 12 | 24,
       has_prep_kit: true,
       stock_status: "In Stock",
       description: "",
       images: [] as string[],
+      whats_included: "",
     });
     setEditingProduct(null);
   };
@@ -156,12 +167,13 @@ export function Products() {
       setFormData({
         name: product.name,
         price: product.price.toString(),
-        category: product.category,
+        category: Array.isArray(product.category) ? product.category : [product.category],
         nail_count: product.nail_count,
         has_prep_kit: product.has_prep_kit,
         stock_status: product.stock_status,
         description: product.description || "",
         images: product.images || [],
+        whats_included: (product.whats_included || []).join('\n'),
       });
     }
     setIsOpen(true);
@@ -329,22 +341,26 @@ export function Products() {
               </div>
               
               <div>
-                <Label>Category</Label>
-                <Select 
-                  value={formData.category} 
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                >
-                  <SelectTrigger className="mt-1 rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Featured">Featured</SelectItem>
-                    <SelectItem value="Premium">Premium</SelectItem>
-                    <SelectItem value="Premium Bridal Sets">Premium Bridal Sets</SelectItem>
-                    <SelectItem value="New Arrivals">New Arrivals</SelectItem>
-                    <SelectItem value="Archives">Archives</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Categories</Label>
+                <div className="mt-2 space-y-2">
+                  {["Featured", "New Arrivals", "Premium Bridal Sets", "Archives"].map((cat) => (
+                    <label key={cat} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-[#FCF9F7] transition-colors" style={{ border: '1px solid #F2D2D6' }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.category.includes(cat)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({ ...formData, category: [...formData.category, cat] });
+                          } else {
+                            setFormData({ ...formData, category: formData.category.filter(c => c !== cat) });
+                          }
+                        }}
+                        className="w-4 h-4 accent-[#7A0D19] rounded"
+                      />
+                      <span className="text-sm">{cat}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
               
               {/* Artisan Details */}
@@ -392,6 +408,17 @@ export function Products() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Tell the story behind this artisan piece..."
                   className="mt-1 rounded-xl min-h-[100px]"
+                />
+              </div>
+
+              {/* What's Included */}
+              <div>
+                <Label>What's Included <span className="text-xs text-gray-400 font-normal">(one item per line, leave empty for defaults)</span></Label>
+                <Textarea 
+                  value={formData.whats_included}
+                  onChange={(e) => setFormData({ ...formData, whats_included: e.target.value })}
+                  placeholder={"Sets of 24 artisan-painted press-on nails\nProfessional nail glue\nAdhesive sticky tabs\nCuticle pusher & nail file\nAlcohol prep pads"}
+                  className="mt-1 rounded-xl min-h-[120px]"
                 />
               </div>
               
@@ -492,12 +519,17 @@ export function Products() {
                 >
                   Rs. {product.price}
                 </span>
-                <span 
-                  className="px-3 py-1 rounded-full text-xs"
-                  style={{ background: '#E5B6BB', color: '#7A0D19' }}
-                >
-                  {product.category}
-                </span>
+                <div className="flex flex-wrap gap-1">
+                  {(Array.isArray(product.category) ? product.category : [product.category]).map((cat) => (
+                    <span 
+                      key={cat}
+                      className="px-2 py-0.5 rounded-full text-[10px]"
+                      style={{ background: '#E5B6BB', color: '#7A0D19' }}
+                    >
+                      {cat}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
